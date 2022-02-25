@@ -53,14 +53,14 @@ def DoMarkdown(file):
 	    md = md_file.read()
 	index = index.replace('{TITLE}', os.path.basename(file))
 	index = index.replace('{CONTENT}', md)
-	print '>> Saving markdown file as '+file+'.html'
+	print('>> Saving markdown file as '+file+'.html')
 	with open(file+'.html', "w") as outfile:
 	    outfile.write(index)
 
 def ProcessDir(indir, is_parent=True, subdirs=[]):
 	if not os.path.isdir(indir):
 		raise RuntimeError('Input argument %s is not a directory' % indir)
-	print '>> Processing directory %s' % indir
+	print('>> Processing directory %s' % indir)
 	
 	files = [f for f in os.listdir(indir) if os.path.isfile(os.path.join(indir,f))]
 	# print files
@@ -71,25 +71,25 @@ def ProcessDir(indir, is_parent=True, subdirs=[]):
 		all_base_files[name].add(ext)
 	
 	# only keep the entries that have a png
-	base_files = dict((k, v) for k, v in all_base_files.items() if '.png' in v)
-	other_files = dict((k, v) for k, v in all_base_files.items() if '.png' not in v and k.startswith('.') is False)
+	base_files = dict((k, v) for k, v in list(all_base_files.items()) if '.png' in v)
+	other_files = dict((k, v) for k, v in list(all_base_files.items()) if '.png' not in v and k.startswith('.') is False)
 	
 	elements = ''
 	search_box = ''
 	
 	groups = defaultdict(set)
 	
-	for f, all_exts in sorted(base_files.iteritems()):
+	for f, all_exts in sorted(base_files.items()):
 		exts = [e for e in all_exts if e not in ['.png', '.json']]
 		tags=''
 		if '.json' in all_exts:
 			json_data = {}
 			with open(os.path.join(indir,f+'.json')) as jsonfile:
 				json_data = json.load(jsonfile)
-			for key, val in json_data.iteritems():
+			for key, val in json_data.items():
 				groups[key].add(val)
 			if len(json_data) > 0:
-				tags = ' ' + ' '.join([CleanStr(x) for x in json_data.values()])
+				tags = ' ' + ' '.join([CleanStr(x) for x in list(json_data.values())])
 		do_exts = [SINGLE_FORMAT.format(file=f+e,ext=e) for e in exts]
 		extra = ''
 		info = '>> Adding %s.png to gallery' % f
@@ -97,7 +97,7 @@ def ProcessDir(indir, is_parent=True, subdirs=[]):
 			extra = OTHER_FORMATS.format(text=' '.join(do_exts))
 			info += ' with extra extensions %s' % ','.join(exts)
 		if args.verbose:
-			print info
+			print(info)
 		elements += PLOT_ELE.format(file='%s.png'%f, tags=tags, extra=extra, fontsize=args.title_size)
 
 	if elements != '':
@@ -107,7 +107,7 @@ def ProcessDir(indir, is_parent=True, subdirs=[]):
 	button_groups=''
 	# The user has added some properties so we need to make buttons
 	if len(groups) > 0:
-		for key, val in groups.iteritems():
+		for key, val in groups.items():
 			buttons='\n'.join([BUTTON.format(NAME=v, FILTER=CleanStr(v)) for v in sorted(val)])
 			button_groups += BUTTON_GROUP.format(GROUP=CleanStr(key), TITLE=key, BUTTONS=buttons)
 	
@@ -126,7 +126,7 @@ def ProcessDir(indir, is_parent=True, subdirs=[]):
 	other_html = []
 	if len(other_files) > 0:
 		added = 0
-		for f, all_exts in sorted(other_files.iteritems()):
+		for f, all_exts in sorted(other_files.items()):
 			for ext in all_exts:
 				if ext in ['.html', '.htm', '.php']: continue
 				added += 1
